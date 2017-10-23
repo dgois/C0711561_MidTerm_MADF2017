@@ -16,12 +16,6 @@ class LoginViewController : UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.navigationController?.setNavigationBarHidden(true, animated: true)
-        // Do any additional setup after loading the view, typically from a nib.
-        
-        // REMOVER
-        textFieldEmail.text = "c0711561@mylambton.ca"
-        textFieldPassword.text = "c0711561"
     }
 
     override func didReceiveMemoryWarning() {

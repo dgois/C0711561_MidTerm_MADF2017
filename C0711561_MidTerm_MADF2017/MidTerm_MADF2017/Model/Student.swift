@@ -34,7 +34,10 @@ class Student {
     }
     
     func getPercentage() -> Double {
-        return (getTotalMarks() / Double(marks.count)) * 100.0
+        if shouldCalculatePercentage() {
+            return (getTotalMarks() / Double(marks.count))
+        }
+        return 0.0
     }
     
     func getResult() -> String {
@@ -59,5 +62,9 @@ class Student {
         }
         
         return result
+    }
+    
+    func shouldCalculatePercentage() -> Bool {
+        return !((marks.filter { $0 < 45 }.count) > 1)
     }
 }

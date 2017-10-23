@@ -33,38 +33,27 @@ class StudentEntryViewController: UIViewController {
         super.viewDidLoad()
         
         dateFormatter.dateFormat = "dd/MM/yyyy"
+        
+        if let s = student {
+            textFieldId.text = s.id
+            textFieldName.text = s.name
+            textFieldEmail.text = s.emailAddress
+            textFieldBirthDate.text = dateFormatter.string(from: s.birthDate)
+            textFieldIOSProg.text = String(s.marks[0])
+            textFieldIntroSwift.text = String(s.marks[1])
+            textFieldProgJava.text = String(s.marks[2])
+            textFieldDatabase.text = String(s.marks[3])
+            textFieldAndroid.text = String(s.marks[4])
+        }
     }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if let studentResultViewController = segue.destination as? StudentResultViewController {
             studentResultViewController.student = student
-        }
-    }
-    
-    fileprivate func validateStudent(_ birthDateFormated: Date, _ email: String, _ name: String, _ id: String) {
-        if !isValidBirthdate(birthdate: birthDateFormated) {
-            errorMessages.append("Birthdate must not be current date")
-        }
-        
-        if !isValidEmail(email: email) {
-            errorMessages.append("Invalid Email format")
-        }
-        
-        if !isValidName(name: name) {
-            errorMessages.append("Invalid Name")
-        }
-        
-        if !isValidId(id: id) {
-            errorMessages.append("Invalid Student Id")
-        }
-        
-        if (errorMessages.count > 0) {
-            showInvalidStudentAlert()
         }
     }
     
@@ -80,20 +69,61 @@ class StudentEntryViewController: UIViewController {
             let databaseMark = textFieldDatabase.text,
             let androidMark = textFieldAndroid.text {
             
-            guard let birthDateFormated = dateFormatter.date(from: birthDate) else {
-                print("invalid error")
-                return
+            if validateStudent(birthDate, email, name, id, iosProgMark, introSwiftMark, progJavaMark, databaseMark, androidMark) {
+                
+                let marks = [Double(iosProgMark)!, Double(introSwiftMark)!, Double(progJavaMark)!, Double(databaseMark)!, Double(androidMark)!]
+                
+                student = Student(id: id, name: name, emailAddress: email, birthDate: dateFormatter.date(from: birthDate)!, marks: marks)
             }
-            
-            validateStudent(birthDateFormated, email, name, id)
-            
-            let marks = [Double(iosProgMark)!, Double(introSwiftMark)!, Double(progJavaMark)!, Double(databaseMark)!, Double(androidMark)!]
-            
-            student = Student(id: id, name: name, emailAddress: email, birthDate: birthDateFormated, marks: marks)
             
             self.performSegue(withIdentifier: "saveStudentSegue", sender: nil)
         }
         
+    }
+    
+    fileprivate func validateStudent(_ birthDate: String, _ email: String, _ name: String, _ id: String, _ iosProgMark: String, _ introSwiftMark: String, _ progJavaMark: String, _ databaseMark: String, _ androidMark: String) -> Bool {
+        
+        if !isValidBirthdate(birthDate: birthDate) {
+            errorMessages.append("Birthdate must not be current date")
+        }
+        
+        if !isValidEmail(email: email) {
+            errorMessages.append("Invalid Email format")
+        }
+        
+        if !isValidName(name: name) {
+            errorMessages.append("Invalid Name")
+        }
+        
+        if !isValidId(id: id) {
+            errorMessages.append("Invalid Student Id")
+        }
+        
+        if !isValidNumber(number: iosProgMark) {
+            errorMessages.append("Invalid IOS Programming Mark")
+        }
+        
+        if !isValidNumber(number: introSwiftMark) {
+            errorMessages.append("Invalid Introduction to Swift Mark")
+        }
+        
+        if !isValidNumber(number: progJavaMark) {
+            errorMessages.append("Invalid Java Programming Mark")
+        }
+        
+        if !isValidNumber(number: databaseMark) {
+            errorMessages.append("Invalid Database and Design Mark")
+        }
+        
+        if !isValidNumber(number: androidMark) {
+            errorMessages.append("Invalid Android Mark")
+        }
+        
+        if (errorMessages.count > 0) {
+            showInvalidStudentAlert()
+        }
+        
+        return errorMessages.count == 0
     }
     
     fileprivate func showInvalidStudentAlert() {
@@ -103,7 +133,9 @@ class StudentEntryViewController: UIViewController {
         }
         let invalidStudentMessage = UIAlertController(title: "Invalid Student", message: message, preferredStyle: .alert)
         
-        invalidStudentMessage.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+        invalidStudentMessage.addAction(UIAlertAction(title: "OK", style: .default, handler: { (_) in
+            self.errorMessages = [String]()
+        }))
         self.present(invalidStudentMessage, animated: true, completion: nil)
     }
     
@@ -121,13 +153,26 @@ class StudentEntryViewController: UIViewController {
         return nameTest.evaluate(with: name)
     }
     
-    func isValidBirthdate(birthdate: Date) -> Bool {
-        return birthdate != Date()
+    func isValidBirthdate(birthDate: String) -> Bool {
+        if birthDate != dateFormatter.string(from: Date()) {
+            if let _ = dateFormatter.date(from: birthDate) {
+                return true
+            }
+        }
+        return false
     }
     
     func isValidId(id: String) -> Bool {
-        let firstCharacter = id[id.index(id.startIndex, offsetBy: 0)]
-        return (id.count == 10 && (firstCharacter == "c" || firstCharacter == "C"))
+        var result = false
+        if (!id.isEmpty) {
+            let firstCharacter = id[id.index(id.startIndex, offsetBy: 0)]
+            result = (id.count == 10 && (firstCharacter == "c" || firstCharacter == "C"))
+        }
+        return result
+    }
+    
+    func isValidNumber(number: String) -> Bool {
+        return !number.isEmpty && Double(number) != nil
     }
 
 }

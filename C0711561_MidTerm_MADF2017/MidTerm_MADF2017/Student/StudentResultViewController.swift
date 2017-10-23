@@ -50,6 +50,12 @@ class StudentResultViewController: UIViewController {
             lblTotalMarks.text = String(describing: student.getTotalMarks())
             lblPercentage.text = String(describing: student.getPercentage())
             lblFinalResult.text = String(describing: student.getResult())
+            
+            if student.shouldCalculatePercentage() {
+                lblFinalResult.textColor = .green
+            } else {
+                lblFinalResult.textColor = .red
+            }
         } else {
             print("Invalid user")
         }
@@ -58,6 +64,12 @@ class StudentResultViewController: UIViewController {
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
+    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if let studentEntryViewController = segue.destination as? StudentEntryViewController {
+            studentEntryViewController.student = student
+        }
     }
 
 }
